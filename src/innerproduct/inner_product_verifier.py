@@ -1,7 +1,10 @@
 """Contains classes for the prover of an inner-product argument"""
 
 from fastecdsa.curve import secp256k1, Curve
-from ..utils.utils import mod_hash, point_to_b64, ModP
+from src.utils.cairo_constants import PROOF_VAR_NAME
+
+from src.utils.transcript import Transcript
+from ..utils.utils import in_cairo_hint, mod_hash, point_to_b64, ModP
 from ..pippenger import PipSECP256k1
 
 SUPERCURVE: Curve = secp256k1
@@ -61,7 +64,7 @@ class Verifier1:
 class Proof2:
     """Proof class for Protocol 2"""
 
-    def __init__(self, a, b, xs, Ls, Rs, transcript, start_transcript: int = 0):
+    def __init__(self, a, b, xs, Ls, Rs, transcript: Transcript, start_transcript: int = 0):
         self.a = a
         self.b = b
         self.xs = xs
@@ -71,6 +74,19 @@ class Proof2:
         self.start_transcript = (
             start_transcript
         )  # Start of transcript to be used if Protocol 2 is run in Protocol 1
+    
+    def convert_to_cairo(self):
+        """
+           Convert the transcript into a cairo so that the verifier can 
+           check the proof
+        """
+        if in_cairo_hint() == False:
+            raise Exception("Must be in a cairo hint")
+        pass
+        self.transcript.convert_to_cairo()
+
+        ids[PROOF_VAR_NAME]
+        pass
 
 
 class Verifier2:

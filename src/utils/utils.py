@@ -12,6 +12,12 @@ CURVE = secp256k1
 BYTE_LENGTH = CURVE.q.bit_length() // 8
 
 
+# Take in a point and return 6 numbers d_x_0, d_x_1, d_x_2, d_y_0, d_y_1, d_y_2,
+# The first three representing x's big int 3 coefficients and the second three
+# representing y big int 3 coefficients
+def point_to_cairo_ec_point(p: Point):
+    pass
+
 def egcd(a, b):
     """Extended euclid algorithm"""
     if a == 0:
@@ -20,6 +26,13 @@ def egcd(a, b):
         g, y, x = egcd(b % a, a)
         return (g, x - (b // a) * y, y)
 
+
+def in_cairo_hint():
+    try:
+        ids
+        return True
+    except NameError:
+        return False
 
 class ModP:
     """Class representing an integer mod p"""
