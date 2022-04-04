@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
+
+from src.utils.utils import to_cairo_big_int
+
 from .modp import ModP
 from fastecdsa.curve import Curve
+from fastecdsa.point import Point
 
 
 class Group(ABC):
@@ -30,3 +34,17 @@ class EC(Group):
 
     def mult(self, x, y):
         return x + y
+
+    def elem_to_cairo(p: Point) -> list[int]:
+        """
+            Take in an ec point and convert it into a cairo struct of type `EcPoint`
+            struct EcPoint:
+                member x : BigInt3
+                member y : BigInt3
+            end
+            @return a list of 6 felt elements
+        """
+        x = to_cairo_big_int(p.x)
+        y = to_cairo_big_int(p.y)
+        return list(x) + list(y)
+        

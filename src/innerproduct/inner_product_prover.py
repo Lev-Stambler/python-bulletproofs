@@ -10,7 +10,7 @@ from ..utils.transcript import Transcript
 
 class NIProver:
     """Class simulating a NI prover for the inner-product argument (Protocol 1)"""
-    def __init__(self, g, h, u, P, c, a, b, group, seed=b""):
+    def __init__(self, g, h, u, P, c, a, b, group, seed=0):
         assert len(g) == len(h) == len(a) == len(b)
         self.g = g
         self.h = h
@@ -47,7 +47,7 @@ class NIProver:
 
 class FastNIProver2:
     """Class simulating a NI prover for the inner-product argument (Protocol 2)"""
-    def __init__(self, g, h, u, P, a, b, group, transcript: Optional[bytes]=None):
+    def __init__(self, g, h, u, P, a, b, group, transcript: Optional[list[int]]=None):
         assert len(g) == len(h) == len(a) == len(b)
         assert len(a) & (len(a) - 1) == 0
         self.log_n = len(a).bit_length() - 1
@@ -62,7 +62,7 @@ class FastNIProver2:
         self.transcript = Transcript()
         if transcript:
             self.transcript.digest += transcript
-            self.init_transcript_length = len(transcript.split(b"&"))
+            self.init_transcript_length = len(self.transcript.digest)
         else:
             self.init_transcript_length = 1
 

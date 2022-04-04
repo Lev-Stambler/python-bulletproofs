@@ -11,6 +11,8 @@ from fastecdsa.util import mod_sqrt
 CURVE = secp256k1
 BYTE_LENGTH = CURVE.q.bit_length() // 8
 
+CAIRO_BIG_INT_BASE = 2 ** 86
+
 
 # Take in a point and return 6 numbers d_x_0, d_x_1, d_x_2, d_y_0, d_y_1, d_y_2,
 # The first three representing x's big int 3 coefficients and the second three
@@ -94,6 +96,7 @@ class ModP:
         return str(self.x)
 
 
+# TODO: convert to a different type of hash (like pederson...)
 def mod_hash(msg: bytes, p: int, non_zero: bool = True) -> ModP:
     """Takes a message and a prime and returns a hash in ModP"""
     i = 0
@@ -148,3 +151,20 @@ def inner_product(a: List[ModP], b: List[ModP]) -> ModP:
     """Inner-product of vectors in Z_p"""
     assert len(a) == len(b)
     return sum([ai * bi for ai, bi in zip(a, b)], ModP(0, a[0].p))
+
+
+def to_cairo_big_int(a: int) -> tuple[int, int, int]:
+    """
+        Takes in an int and returns a big int tuple of (d0, d1, d2)
+        where d0 + BASE * d1 + BASE**2 * d2
+        struct BigInt3:
+            member d0 : felt
+            member d1 : felt
+            member d2 : felt
+        end
+    """
+    d2 = a // CAIRO_BIG_INT_BASE ** 2
+    d1 = (a - d2 * CAIRO_BIG_INT_BASE ** 2) // CAIRO_BIG_INT_BASE
+    d0 = (a - d1 * CAIRO_BIG_INT_BASE - d2 * CAIRO_BIG_INT_BASE ** 2)
+    return d0, d1, d2
+    

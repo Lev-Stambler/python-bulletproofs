@@ -19,7 +19,7 @@ class NIRangeProver:
         gamma: ModP,
         u: Point,
         group,
-        seed: bytes = b"",
+        seed: bytes = 0,
     ):
         self.v = v
         self.n = n

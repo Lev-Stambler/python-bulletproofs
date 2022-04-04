@@ -38,19 +38,19 @@ class Verifier1:
 
     def verify_transcript(self):
         """Verify a transcript to assure Fiat-Shamir was done properly"""
-        lTranscript = self.proof1.transcript.split(b"&")
+        lTranscript = self.proof1.transcript
         self.assertThat(
             lTranscript[1]
-            == str(mod_hash(b"&".join(lTranscript[:1]) + b"&", SUPERCURVE.q)).encode()
+            == Transcript.digest_to_hash(lTranscript[:1], SUPERCURVE.q)
         )
 
     def verify(self):
         """Verifies the proof given by a prover. Raises an execption if it is invalid"""
         self.verify_transcript()
 
-        lTranscript = self.proof1.transcript.split(b"&")
+        lTranscript = self.proof1.transcript
         x = lTranscript[1]
-        x = ModP(int(x), SUPERCURVE.q)
+        x = ModP(x, SUPERCURVE.q)
         self.assertThat(self.proof1.P_new == self.P + (x * self.c) * self.u)
         self.assertThat(self.proof1.u_new == x * self.u)
 
@@ -74,7 +74,7 @@ class Proof2:
         self.start_transcript = (
             start_transcript
         )  # Start of transcript to be used if Protocol 2 is run in Protocol 1
-    
+
     def convert_to_cairo(self):
         """
            Convert the transcript into a cairo so that the verifier can 
@@ -125,19 +125,18 @@ class Verifier2:
         Ls = self.proof.Ls
         Rs = self.proof.Rs
         xs = self.proof.xs
-        lTranscript = self.proof.transcript.split(b"&")
+        lTranscript = self.proof.transcript
         for i in range(log_n):
-            self.assertThat(lTranscript[init_len + i * 3] == point_to_b64(Ls[i]))
-            self.assertThat(lTranscript[init_len + i * 3 + 1] == point_to_b64(Rs[i]))
+            self.assertThat(lTranscript[init_len + i * 3] == Ls[i])
+            self.assertThat(lTranscript[init_len + i * 3 + 1] == Rs[i])
             self.assertThat(
-                str(xs[i]).encode()
+                xs[i]
                 == lTranscript[init_len + i * 3 + 2]
-                == str(
-                    mod_hash(
-                        b"&".join(lTranscript[: init_len + i * 3 + 2]) + b"&",
-                        SUPERCURVE.q,
-                    )
-                ).encode()
+                ==
+                Transcript.digest_to_hash(
+                    lTranscript[: init_len + i * 3 + 2],
+                    SUPERCURVE.q,
+                )
             )
 
     def verify(self):

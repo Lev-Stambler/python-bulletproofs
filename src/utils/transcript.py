@@ -1,19 +1,23 @@
 import base64
 
+from fastecdsa.point import Point
+from src.pippenger.group import EC
+
 from src.utils.cairo_constants import TRANSCRIPT_VAR_NAME
 
-from .utils import in_cairo_hint, mod_hash, point_to_b64
+from .utils import in_cairo_hint, mod_hash, point_to_b64, point_to_cairo_ec_point
 
 
+# Transcript now uses a mod hash to separate and hash
 class Transcript:
     """
     Transcript class.
     Contains all parameters used to generate randomness using Fiat-Shamir
-    Separate every entity by a '&'. 
+    Every entity is an integer and an element in a list
     """
 
-    def __init__(self, seed=b""):
-        self.digest = base64.b64encode(seed) + b"&"
+    def __init__(self, seed=0):
+        self.digest = [seed]
 
     def convert_to_cairo(self):
         """
@@ -25,10 +29,11 @@ class Transcript:
         # ids[TRANSCRIPT_VAR_NAME] = 
         pass
 
-    def add_point(self, g):
+    def add_point(self, g: Point):
         """Add an elliptic curve point to the transcript"""
-        self.digest += point_to_b64(g)
-        self.digest += b"&"
+        self.digest += [g]
+        # Up next is get the verifier to change the way it checks the transcript for Python
+        # (helps with testing purposes...)
 
     def add_list_points(self, gs):
         """Add a list of elliptic curve point to the transcript"""
@@ -37,9 +42,19 @@ class Transcript:
 
     def add_number(self, x):
         """Add a number to the transcript"""
-        self.digest += str(x).encode()
-        self.digest += b"&"
+        self.digest += [x]
 
     def get_modp(self, p):
+        return Transcript.digest_to_hash(self.digest, p)
+
+    def digest_to_hash(digest: list, p):
         """Generate a number as the hash of the digest"""
-        return mod_hash(self.digest, p)
+        int_list = []
+        for i in digest:
+            if isinstance(i, Point):
+                int_list += EC.elem_to_cairo(i)
+            else:
+                int_list += [i]
+        # TODO: remove bytearray once converted
+        return mod_hash(bytearray(str.encode(str(int_list))), p)
+

@@ -19,7 +19,7 @@ class AggregNIRangeProver:
         gammas: List[ModP],
         u: Point,
         group,
-        seed: bytes = b"",
+        seed: bytes = 0,
     ):
         self.vs = vs
         self.n = n

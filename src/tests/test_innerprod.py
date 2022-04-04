@@ -2,6 +2,8 @@ import unittest
 import os
 from random import randint
 from fastecdsa.curve import secp256k1, Curve
+
+from src.pippenger.group import EC
 from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
 from ..innerproduct.inner_product_verifier import Verifier1, Verifier2
 from ..utils.commitments import vector_commitment
@@ -99,7 +101,7 @@ class Protocol2Test(unittest.TestCase):
 
 
 class InnerProductArgumentTest(unittest.TestCase):
-    def test_different_seeds(self):
+    def test_different_seeds_innerprod(self):
         for _ in range(10):
             seeds = [os.urandom(10) for _ in range(6)]
             p = CURVE.q
