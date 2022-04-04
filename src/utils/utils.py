@@ -1,12 +1,15 @@
 """Contains various utilities"""
 
-from hashlib import sha256
-from typing import List
+from sympy import Mod
+from hashlib import blake2s
+from typing import List, Union
 import base64
 
 from fastecdsa.point import Point
 from fastecdsa.curve import secp256k1
 from fastecdsa.util import mod_sqrt
+
+from src.utils.uint256 import Uint256
 
 CURVE = secp256k1
 BYTE_LENGTH = CURVE.q.bit_length() // 8
@@ -19,6 +22,7 @@ CAIRO_BIG_INT_BASE = 2 ** 86
 # representing y big int 3 coefficients
 def point_to_cairo_ec_point(p: Point):
     pass
+
 
 def egcd(a, b):
     """Extended euclid algorithm"""
@@ -35,6 +39,7 @@ def in_cairo_hint():
         return True
     except NameError:
         return False
+
 
 class ModP:
     """Class representing an integer mod p"""
@@ -96,21 +101,47 @@ class ModP:
         return str(self.x)
 
 
+# def cairo_keccak(data: list[int]) -> Uint256:
+#     data, length = data, len(data)
+
+#     keccak_input = bytearray()
+#     for word_i, byte_i in enumerate(range(0, length, 16)):
+#         word = data[word_i]
+#         n_bytes = min(16, length - byte_i)
+#         assert 0 <= word < 2 ** (8 * n_bytes)
+#         keccak_input += word.to_bytes(n_bytes, 'big')
+
+#     hashed = keccak(keccak_input)
+#     high = int.from_bytes(hashed[:16], 'big')
+#     low = int.from_bytes(hashed[16:32], 'big')
+#     return Uint256(low, high)
+
 # TODO: convert to a different type of hash (like pederson...)
-def mod_hash(msg: bytes, p: int, non_zero: bool = True) -> ModP:
+
+
+def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> ModP:
     """Takes a message and a prime and returns a hash in ModP"""
-    i = 0
-    while True:
-        i += 1
-        prefixed_msg = str(i).encode() + msg
-        h = sha256(prefixed_msg).hexdigest()
-        x = int(h, 16) % 2 ** p.bit_length()
-        if x >= p:
-            continue
-        elif non_zero and x == 0:
-            continue
-        else:
-            return ModP(x, p)
+    digest = None
+    if isinstance(msg, bytes):
+        digest = blake2s(msg).digest()
+    else:
+        _bytes = bytes([])
+        for e in msg:
+            _bytes += e.to_bytes(4, "little")
+        digest = blake2s(_bytes).digest() 
+
+    int_list = []
+    digest = list(digest)
+    # Digest is a list of 8 32 bit words
+    for pos in range(0, len(digest), 4):
+        int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
+    
+    # TODO: this step feels sketch...
+    ret = ModP(1, p)
+    for i in int_list:
+        ret *= ModP(i, p)
+    print(ret)
+    return ret
 
 
 def point_to_bytes(g: Point) -> bytes:
@@ -167,4 +198,3 @@ def to_cairo_big_int(a: int) -> tuple[int, int, int]:
     d1 = (a - d2 * CAIRO_BIG_INT_BASE ** 2) // CAIRO_BIG_INT_BASE
     d0 = (a - d1 * CAIRO_BIG_INT_BASE - d2 * CAIRO_BIG_INT_BASE ** 2)
     return d0, d1, d2
-    
