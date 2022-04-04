@@ -137,11 +137,10 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> Mod
         int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
     
     # TODO: this step feels sketch...
-    ret = ModP(1, p)
+    ret = 0
     for i in int_list:
-        ret *= ModP(i, p)
-    print(ret)
-    return ret
+        ret = (ret << 32) + i
+    return ModP(ret, p)
 
 
 def point_to_bytes(g: Point) -> bytes:
