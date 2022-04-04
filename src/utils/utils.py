@@ -33,14 +33,6 @@ def egcd(a, b):
         return (g, x - (b // a) * y, y)
 
 
-def in_cairo_hint():
-    try:
-        ids
-        return True
-    except NameError:
-        return False
-
-
 class ModP:
     """Class representing an integer mod p"""
 
@@ -101,24 +93,6 @@ class ModP:
         return str(self.x)
 
 
-# def cairo_keccak(data: list[int]) -> Uint256:
-#     data, length = data, len(data)
-
-#     keccak_input = bytearray()
-#     for word_i, byte_i in enumerate(range(0, length, 16)):
-#         word = data[word_i]
-#         n_bytes = min(16, length - byte_i)
-#         assert 0 <= word < 2 ** (8 * n_bytes)
-#         keccak_input += word.to_bytes(n_bytes, 'big')
-
-#     hashed = keccak(keccak_input)
-#     high = int.from_bytes(hashed[:16], 'big')
-#     low = int.from_bytes(hashed[16:32], 'big')
-#     return Uint256(low, high)
-
-# TODO: convert to a different type of hash (like pederson...)
-
-
 def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> ModP:
     """Takes a message and a prime and returns a hash in ModP"""
     digest = None
@@ -127,7 +101,9 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> Mod
     else:
         _bytes = bytes([])
         for e in msg:
-            _bytes += e.to_bytes(4, "little")
+            # TODO: this can probably be far more efficient by not having padded words
+            # this also means that you will have to preprocess the input on cairo side...
+            _bytes += e.to_bytes(32, "little")
         digest = blake2s(_bytes).digest() 
 
     int_list = []
@@ -136,7 +112,6 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> Mod
     for pos in range(0, len(digest), 4):
         int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
     
-    # TODO: this step feels sketch...
     ret = 0
     for i in int_list:
         ret = (ret << 32) + i

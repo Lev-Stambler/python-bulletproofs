@@ -1,11 +1,7 @@
-import base64
-
 from fastecdsa.point import Point
 from src.pippenger.group import EC
 
-from src.utils.cairo_constants import TRANSCRIPT_VAR_NAME
-
-from .utils import in_cairo_hint, mod_hash, point_to_b64, point_to_cairo_ec_point
+from .utils import ModP, mod_hash, point_to_b64, point_to_cairo_ec_point
 
 
 # Transcript now uses a mod hash to separate and hash
@@ -19,14 +15,20 @@ class Transcript:
     def __init__(self, seed=0):
         self.digest = [seed]
 
-    def convert_to_cairo(self):
+    def convert_to_cairo(ids, memory, segments, digest: list):
         """
            Convert the transcript into a cairo so that the verifier can 
            check the transcript
         """
-        if in_cairo_hint() == False:
-            raise Exception("Must be in a cairo hint")
-        # ids[TRANSCRIPT_VAR_NAME] = 
+        felt_list = Transcript.digest_to_int_list(digest[1:])
+
+        ids.n_transcript_entries = 10
+        ids.transcript_seed = digest[0]
+        #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
+        ids.transcript_entries = transcript_entries = segments.add()
+        for i, val in enumerate(felt_list):
+            memory[transcript_entries + i] = val
+
         pass
 
     def add_point(self, g: Point):
@@ -49,12 +51,17 @@ class Transcript:
 
     def digest_to_hash(digest: list, p):
         """Generate a number as the hash of the digest"""
+        int_list = Transcript.digest_to_int_list(digest)
+        return mod_hash(int_list, p)
+
+    def digest_to_int_list(digest: list) -> list[int]:
         int_list = []
         for i in digest:
             if isinstance(i, Point):
                 int_list += EC.elem_to_cairo(i)
+            elif isinstance(i, ModP):
+                int_list += [i.x]
             else:
                 int_list += [i]
-        # TODO: remove bytearray once converted
-        return mod_hash(bytearray(str.encode(str(int_list))), p)
 
+        return int_list

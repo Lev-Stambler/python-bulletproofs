@@ -7,7 +7,7 @@ from src.pippenger.group import EC
 from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
 from ..innerproduct.inner_product_verifier import Verifier1, Verifier2
 from ..utils.commitments import vector_commitment
-from ..utils.utils import mod_hash, inner_product
+from ..utils.utils import ModP, mod_hash, inner_product
 from ..utils.elliptic_curve_hash import elliptic_hash
 
 
