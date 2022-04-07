@@ -1,7 +1,7 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1
+from fastecdsa.curve import P224
 
 from ..utils.utils import (
     mod_hash,
@@ -10,9 +10,9 @@ from ..utils.utils import (
     b64_to_point,
     point_to_b64,
 )
-from ..utils.elliptic_curve_hash import elliptic_hash
+from ..utils.elliptic_curve_hash import elliptic_hash_P224
 
-CURVE = secp256k1
+CURVE = P224
 
 
 class HashTest(unittest.TestCase):
@@ -28,10 +28,10 @@ class HashTest(unittest.TestCase):
             with self.subTest(msg=msg, p=p):
                 self.assertNotEqual(x.x, 0)
 
-    def test_elliptic_hash(self):
+    def test_elliptic_hash_P224(self):
         for _ in range(100):
             msg = os.urandom(10)
-            x = elliptic_hash(msg, CURVE)
+            x = elliptic_hash_P224(msg, CURVE)
             with self.subTest(msg=msg):
                 self.assertTrue(CURVE.is_point_on_curve((x.x, x.y)))
 

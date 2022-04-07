@@ -1,17 +1,17 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1, Curve
+from fastecdsa.curve import P224, Curve
 
 from src.pippenger.group import EC
 from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
 from ..innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
 from ..utils.commitments import vector_commitment
 from ..utils.utils import ModP, mod_hash, inner_product
-from ..utils.elliptic_curve_hash import elliptic_hash
+from ..utils.elliptic_curve_hash import elliptic_hash_P224
 
 
-CURVE: Curve = secp256k1
+CURVE: Curve = P224
 
 
 class Protocol2Test(unittest.TestCase):
@@ -20,9 +20,9 @@ class Protocol2Test(unittest.TestCase):
             seeds = [os.urandom(10) for _ in range(6)]
             p = SUPERCURVE.q#2 ** 251 + 17 * 2 ** 192 + 1
             N = 2 ** i
-            g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-            h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-            u = elliptic_hash(seeds[2], CURVE)
+            g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+            h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+            u = elliptic_hash_P224(seeds[2], CURVE)
             a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
             b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
             P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
@@ -37,9 +37,9 @@ class Protocol2Test(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
@@ -53,9 +53,9 @@ class Protocol2Test(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
@@ -70,9 +70,9 @@ class Protocol2Test(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
@@ -87,9 +87,9 @@ class Protocol2Test(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         b[randint(0, N - 1)] *= 2
@@ -107,9 +107,9 @@ class InnerProductArgumentTest(unittest.TestCase):
             seeds = [os.urandom(10) for _ in range(6)]
             p = CURVE.q
             N = 16
-            g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-            h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-            u = elliptic_hash(seeds[2], CURVE)
+            g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+            h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+            u = elliptic_hash_P224(seeds[2], CURVE)
             a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
             b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
             P = vector_commitment(g, h, a, b)
@@ -125,9 +125,9 @@ class InnerProductArgumentTest(unittest.TestCase):
             seeds = [os.urandom(10) for _ in range(6)]
             p = CURVE.q
             N = 2 ** i
-            g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-            h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-            u = elliptic_hash(seeds[2], CURVE)
+            g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+            h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+            u = elliptic_hash_P224(seeds[2], CURVE)
             a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
             b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
             P = vector_commitment(g, h, a, b)
@@ -142,9 +142,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
@@ -159,9 +159,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
@@ -176,9 +176,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
@@ -194,9 +194,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
@@ -212,9 +212,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         u *= 2
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
@@ -230,9 +230,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
@@ -251,9 +251,9 @@ class InnerProductArgumentTest(unittest.TestCase):
         seeds = [os.urandom(10) for _ in range(6)]
         p = CURVE.q
         N = 16
-        g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
-        h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
-        u = elliptic_hash(seeds[2], CURVE)
+        g = [elliptic_hash_P224(str(i).encode() + seeds[0], CURVE) for i in range(N)]
+        h = [elliptic_hash_P224(str(i).encode() + seeds[1], CURVE) for i in range(N)]
+        u = elliptic_hash_P224(seeds[2], CURVE)
         a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
         b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
         P = vector_commitment(g, h, a, b)
