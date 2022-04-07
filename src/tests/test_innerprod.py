@@ -5,7 +5,7 @@ from fastecdsa.curve import secp256k1, Curve
 
 from src.pippenger.group import EC
 from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
-from ..innerproduct.inner_product_verifier import Verifier1, Verifier2
+from ..innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
 from ..utils.commitments import vector_commitment
 from ..utils.utils import ModP, mod_hash, inner_product
 from ..utils.elliptic_curve_hash import elliptic_hash
@@ -18,7 +18,7 @@ class Protocol2Test(unittest.TestCase):
     def test_protocol_2(self):
         for i in range(9):
             seeds = [os.urandom(10) for _ in range(6)]
-            p = CURVE.q
+            p = SUPERCURVE.q#2 ** 251 + 17 * 2 ** 192 + 1
             N = 2 ** i
             g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
             h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
@@ -26,9 +26,10 @@ class Protocol2Test(unittest.TestCase):
             a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
             b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
             P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
-            Prov = FastNIProver2(g, h, u, P, a, b, CURVE)
+
+            Prov = FastNIProver2(g, h, u, P, a, b, CURVE, prime=p)
             proof = Prov.prove()
-            Verif = Verifier2(g, h, u, P, proof)
+            Verif = Verifier2(g, h, u, P, proof, prime=p)
             with self.subTest(seeds=seeds, N=N):
                 self.assertTrue(Verif.verify())
 

@@ -4,7 +4,7 @@ from fastecdsa.curve import secp256k1, Curve
 from src.utils.cairo_constants import PROOF_VAR_NAME
 
 from src.utils.transcript import Transcript
-from ..utils.utils import in_cairo_hint, mod_hash, point_to_b64, ModP
+from ..utils.utils import mod_hash, point_to_b64, ModP
 from ..pippenger import PipSECP256k1
 
 SUPERCURVE: Curve = secp256k1
@@ -23,13 +23,14 @@ class Proof1:
 class Verifier1:
     """Verifier class for Protocol 1"""
 
-    def __init__(self, g, h, u, P, c, proof1):
+    def __init__(self, g, h, u, P, c, proof1, prime=None):
         self.g = g
         self.h = h
         self.u = u
         self.P = P
         self.c = c
         self.proof1 = proof1
+        self.prime = SUPERCURVE.q if prime is None else prime
 
     def assertThat(self, expr: bool):
         """Assert that expr is truthy else raise exception"""
@@ -41,7 +42,7 @@ class Verifier1:
         lTranscript = self.proof1.transcript
         self.assertThat(
             lTranscript[1]
-            == Transcript.digest_to_hash(lTranscript[:1], SUPERCURVE.q)
+            == Transcript.digest_to_hash(lTranscript[:1], self.prime)
         )
 
     def verify(self):
@@ -50,7 +51,7 @@ class Verifier1:
 
         lTranscript = self.proof1.transcript
         x = lTranscript[1]
-        x = ModP(x, SUPERCURVE.q)
+        x = ModP(x, self.prime)
         self.assertThat(self.proof1.P_new == self.P + (x * self.c) * self.u)
         self.assertThat(self.proof1.u_new == x * self.u)
 
@@ -64,7 +65,7 @@ class Verifier1:
 class Proof2:
     """Proof class for Protocol 2"""
 
-    def __init__(self, a, b, xs, Ls, Rs, transcript: Transcript, start_transcript: int = 0):
+    def __init__(self, a, b, xs, Ls, Rs, transcript: Transcript, start_transcript: int = 0, prime=None):
         self.a = a
         self.b = b
         self.xs = xs
@@ -80,8 +81,6 @@ class Proof2:
            Convert the transcript into a cairo so that the verifier can 
            check the proof
         """
-        if in_cairo_hint() == False:
-            raise Exception("Must be in a cairo hint")
         pass
         self.transcript.convert_to_cairo()
 
@@ -92,9 +91,10 @@ class Proof2:
 class Verifier2:
     """Verifier class for Protocol 2"""
 
-    def __init__(self, g, h, u, P, proof: Proof2):
+    def __init__(self, g, h, u, P, proof: Proof2, prime=None):
         self.g = g
         self.h = h
+        self.prime = SUPERCURVE.q if prime is None else prime
         self.u = u
         self.P = P
         self.proof = proof
@@ -110,7 +110,7 @@ class Verifier2:
         log_n = n.bit_length() - 1
         ss = []
         for i in range(1, n + 1):
-            tmp = ModP(1, SUPERCURVE.q)
+            tmp = ModP(1, self.prime)
             for j in range(0, log_n):
                 b = 1 if bin(i - 1)[2:].zfill(log_n)[j] == "1" else -1
                 tmp *= xs[j] if b == 1 else xs[j].inv()
@@ -135,7 +135,7 @@ class Verifier2:
                 ==
                 Transcript.digest_to_hash(
                     lTranscript[: init_len + i * 3 + 2],
-                    SUPERCURVE.q,
+                    self.prime,
                 )
             )
 

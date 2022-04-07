@@ -10,9 +10,10 @@ from ..utils.transcript import Transcript
 
 class NIProver:
     """Class simulating a NI prover for the inner-product argument (Protocol 1)"""
-    def __init__(self, g, h, u, P, c, a, b, group, seed=0):
+    def __init__(self, g, h, u, P, c, a, b, group, prime=None, seed=0):
         assert len(g) == len(h) == len(a) == len(b)
         self.g = g
+        self.prime = group.q if prime is None else prime
         self.h = h
         self.u = u
         self.P = P
@@ -28,7 +29,7 @@ class NIProver:
         Returns a Proof1 object.
         """
         # x = mod_hash(self.transcript.digest, self.group.order)
-        x = self.transcript.get_modp(self.group.q)
+        x = self.transcript.get_modp(self.prime)
         self.transcript.add_number(x)
         P_new = self.P + (x * self.c) * self.u
         u_new = x * self.u
@@ -47,11 +48,12 @@ class NIProver:
 
 class FastNIProver2:
     """Class simulating a NI prover for the inner-product argument (Protocol 2)"""
-    def __init__(self, g, h, u, P, a, b, group, transcript: Optional[list[int]]=None):
+    def __init__(self, g, h, u, P, a, b, group, prime=None, transcript: Optional[list[int]]=None):
         assert len(g) == len(h) == len(a) == len(b)
         assert len(a) & (len(a) - 1) == 0
         self.log_n = len(a).bit_length() - 1
         self.n = len(a)
+        self.prime = group.q if prime is None else prime
         self.g = g
         self.h = h
         self.u = u
@@ -101,7 +103,7 @@ class FastNIProver2:
             Rs.append(R)
             self.transcript.add_list_points([L, R])
             # x = mod_hash(self.transcript.digest, self.group.order)
-            x = self.transcript.get_modp(self.group.q)
+            x = self.transcript.get_modp(self.prime)
             xs.append(x)
             self.transcript.add_number(x)
             gp = [x.inv() * gi_fh + x * gi_sh for gi_fh, gi_sh in zip(gp[:np], gp[np:])]
