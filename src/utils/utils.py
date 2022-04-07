@@ -103,18 +103,19 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> Mod
         for e in msg:
             # TODO: this can probably be far more efficient by not having padded words
             # this also means that you will have to preprocess the input on cairo side...
-            _bytes += e.to_bytes(32, "little")
-        digest = blake2s(_bytes).digest() 
+            _bytes += e.to_bytes(6 * 4, "little")
+        # _bytes = [int.from_bytes(_bytes[i:i+1], 'little')
+        #           for i in range(len(_bytes))]
+        digest = blake2s(_bytes).digest()
 
     int_list = []
     digest = list(digest)
-    # Digest is a list of 8 32 bit words
+    # Digest is a list of 8 24 bit words
     for pos in range(0, len(digest), 4):
         int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
-    
-    ret = 0
+    ret = ModP(0, p)
     for i in int_list:
-        ret = (ret << 32) + i
+        ret = (ret * ModP(2 ** 32, p)) + ModP(i, p)
     return ModP(ret, p)
 
 
