@@ -1,6 +1,8 @@
 """Contains classes for the prover of an inner-product argument"""
 
 from fastecdsa.curve import P224, Curve
+from sympy import Point
+from src.pippenger.group import EC
 from src.utils.cairo_constants import PROOF_VAR_NAME
 
 from src.utils.transcript import Transcript
@@ -65,7 +67,7 @@ class Verifier1:
 class Proof2:
     """Proof class for Protocol 2"""
 
-    def __init__(self, a, b, xs, Ls, Rs, transcript: Transcript, start_transcript: int = 0, prime=None):
+    def __init__(self, a: ModP, b: ModP, xs: list[ModP], Ls: list[ModP], Rs: list[ModP], transcript: Transcript, start_transcript: int = 0, prime=None):
         self.a = a
         self.b = b
         self.xs = xs
@@ -76,16 +78,36 @@ class Proof2:
             start_transcript
         )  # Start of transcript to be used if Protocol 2 is run in Protocol 1
 
-    def convert_to_cairo(self):
+    def convert_to_cairo(self, ids, memory, segments):
         """
            Convert the transcript into a cairo so that the verifier can 
            check the proof
         """
-        pass
-        self.transcript.convert_to_cairo()
+        ids.proof_innerprod_2 = [
+            self.a.x,
+            self.b.x,
+        ]
 
-        ids[PROOF_VAR_NAME]
-        pass
+        Transcript.convert_to_cairo(ids, memory, segments, self.transcript.digest)
+        # self.transcript.convert_to_cairo()
+
+        # ids[PROOF_VAR_NAME]
+
+    # def convert_to_cairo(ids, memory, segments, digest: list):
+    #     """
+    #        Convert the transcript into a cairo so that the verifier can
+    #        check the transcript
+    #     """
+    #     felt_list = Transcript.digest_to_int_list(digest[1:])
+
+    #     ids.n_rounds = 10
+    #     ids.transcript_seed = digest[0]
+    #     #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
+    #     ids.transcript_entries = transcript_entries = segments.add()
+    #     for i, val in enumerate(felt_list):
+    #         memory[transcript_entries + i] = val
+
+    #     pass
 
 
 class Verifier2:
@@ -108,6 +130,7 @@ class Verifier2:
         """See page 15 in paper"""
         n = len(self.g)
         log_n = n.bit_length() - 1
+        print("LOG N", log_n)
         ss = []
         for i in range(1, n + 1):
             tmp = ModP(1, self.prime)
@@ -120,6 +143,7 @@ class Verifier2:
     def verify_transcript(self):
         """Verify a transcript to assure Fiat-Shamir was done properly"""
         init_len = self.proof.start_transcript
+        print((len(self.proof.transcript) -1 ) // 3)
         n = len(self.g)
         log_n = n.bit_length() - 1
         Ls = self.proof.Ls

@@ -15,6 +15,7 @@ CURVE = P224
 BYTE_LENGTH = CURVE.q.bit_length() // 8
 
 CAIRO_BIG_INT_BASE = 2 ** 86
+CAIRO_PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
 
 
 # Take in a point and return 6 numbers d_x_0, d_x_1, d_x_2, d_y_0, d_y_1, d_y_2,
@@ -54,11 +55,11 @@ class ModP:
 
     def __mul__(self, y):
         if isinstance(y, int):
-            return ModP(self.x * y, self.p)
+            return ModP((self.x % self.p) * (y % self.p), self.p)
         if isinstance(y, Point):
             return self.x * y
         assert self.p == y.p
-        return ModP((self.x * y.x) % self.p, self.p)
+        return ModP(((self.x % self.p) * (y.x % y.p)) % self.p, self.p)
 
     def __sub__(self, y):
         if isinstance(y, int):
@@ -100,9 +101,17 @@ class ModP:
         return str(self.x)
 
 
-def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> ModP:
-    """Takes a message and a prime and returns a hash in ModP"""
+def mod_hash(msg: Union[bytes, list[int]], p: int, p_computation = CAIRO_PRIME) -> ModP:
+    """
+    Takes a message and a prime and returns a hash in ModP. Computation is done in p_computation if specified.
+    Because a random number modulo a prime retains its "randomness" property
+    (i.e. uniform probability distribution over F_p), we can compute the hash in the prime CAIRO_PRIME,
+    and return the result mod a smaller prime p
+    This is done for ease of computation in Cairo
+    """
     digest = None
+    p_computation = p if p_computation is None else p_computation
+    assert p_computation >= p
     if isinstance(msg, bytes):
         digest = blake2s(msg).digest()
     else:
@@ -120,10 +129,10 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, non_zero: bool = True) -> Mod
     # Digest is a list of 8 32 bit words
     for pos in range(0, len(digest), 4):
         int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
-    ret = ModP(0, p)
+    ret = ModP(0, p_computation)
     for i in int_list:
-        ret = (ret * ModP(2 ** 32, p)) + ModP(i, p)
-    return ModP(ret, p)
+        ret = (ret * ModP(2 ** 32, p_computation)) + ModP(i, p_computation)
+    return ModP(ret.x, p)
 
 
 def point_to_bytes(g: Point) -> bytes:

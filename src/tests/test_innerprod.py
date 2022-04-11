@@ -10,7 +10,7 @@ from ..utils.commitments import vector_commitment
 from ..utils.utils import ModP, mod_hash, inner_product
 from ..utils.elliptic_curve_hash import elliptic_hash_P224
 
-
+PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
 CURVE: Curve = P224
 
 

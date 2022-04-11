@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from src.utils.utils import to_cairo_big_int
 
-from .modp import ModP
+from src.utils.utils import ModP
 from fastecdsa.curve import Curve
 from fastecdsa.point import Point
 

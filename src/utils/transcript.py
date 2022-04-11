@@ -22,14 +22,24 @@ class Transcript:
         """
         felt_list = Transcript.digest_to_int_list(digest[1:])
 
-        ids.n_transcript_entries = 10
-        ids.transcript_seed = digest[0]
-        #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
+        ids.transcript = transcript = segments.add()
+
+        # set the seed
+        memory[transcript] = digest[0]
+        # set number of entries to be the number of points/ mod p ints - 1 / 3
+        # This is because there is 1 entry for the seed, and for every L, R, x,
+        # there is one entry
+        assert (len(digest) - 1) % 3 == 0
+        memory[transcript + 1] = (len(digest) - 1) // 3
+
         ids.transcript_entries = transcript_entries = segments.add()
+
+        # Set the transcript
+        memory[transcript + 2] = transcript_entries
+
+        #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
         for i, val in enumerate(felt_list):
             memory[transcript_entries + i] = val
-
-        pass
 
     def add_point(self, g: Point):
         """Add an elliptic curve point to the transcript"""
