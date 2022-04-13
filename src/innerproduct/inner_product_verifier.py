@@ -1,15 +1,15 @@
 """Contains classes for the prover of an inner-product argument"""
 
-from fastecdsa.curve import P224, Curve
+from fastecdsa.curve import secp256k1, Curve
 from sympy import Point
 from src.pippenger.group import EC
 from src.utils.cairo_constants import PROOF_VAR_NAME
 
 from src.utils.transcript import Transcript
 from ..utils.utils import mod_hash, point_to_b64, ModP
-from ..pippenger import PipP224
+from ..pippenger import Pipsecp256k1
 
-SUPERCURVE: Curve = P224
+SUPERCURVE: Curve = secp256k1
 
 
 class Proof1:
@@ -130,7 +130,6 @@ class Verifier2:
         """See page 15 in paper"""
         n = len(self.g)
         log_n = n.bit_length() - 1
-        print("LOG N", log_n)
         ss = []
         for i in range(1, n + 1):
             tmp = ModP(1, self.prime)
@@ -168,7 +167,7 @@ class Verifier2:
         self.verify_transcript()
 
         proof = self.proof
-        Pip = PipP224
+        Pip = Pipsecp256k1
         ss = self.get_ss(self.proof.xs)
         LHS = Pip.multiexp(
             self.g + self.h + [self.u],

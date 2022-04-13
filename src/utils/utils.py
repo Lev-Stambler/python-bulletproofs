@@ -6,12 +6,12 @@ from typing import List, Union
 import base64
 
 from fastecdsa.point import Point
-from fastecdsa.curve import P224
+from fastecdsa.curve import secp256k1
 from fastecdsa.util import mod_sqrt
 
 from src.utils.uint256 import Uint256
 
-CURVE = P224
+CURVE = secp256k1
 BYTE_LENGTH = CURVE.q.bit_length() // 8
 
 CAIRO_BIG_INT_BASE = 2 ** 86
@@ -101,7 +101,7 @@ class ModP:
         return str(self.x)
 
 
-def mod_hash(msg: Union[bytes, list[int]], p: int, p_computation = CAIRO_PRIME) -> ModP:
+def mod_hash(msg: Union[bytes, list[int]], p: int, p_computation=CAIRO_PRIME) -> ModP:
     """
     Takes a message and a prime and returns a hash in ModP. Computation is done in p_computation if specified.
     Because a random number modulo a prime retains its "randomness" property
@@ -111,7 +111,7 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, p_computation = CAIRO_PRIME) 
     """
     digest = None
     p_computation = p if p_computation is None else p_computation
-    assert p_computation >= p
+    #assert p_computation >= p
     if isinstance(msg, bytes):
         digest = blake2s(msg).digest()
     else:
@@ -189,3 +189,10 @@ def to_cairo_big_int(a: int) -> tuple[int, int, int]:
     d1 = (a - d2 * CAIRO_BIG_INT_BASE ** 2) // CAIRO_BIG_INT_BASE
     d0 = (a - d1 * CAIRO_BIG_INT_BASE - d2 * CAIRO_BIG_INT_BASE ** 2)
     return d0, d1, d2
+
+
+def from_cairo_big_int(d0: int, d1: int, d2: int) -> int:
+    x2 = CAIRO_BIG_INT_BASE ** 2 * d2
+    x1 = CAIRO_BIG_INT_BASE * d1
+    x0 = d0
+    return x2 + x1 + x0

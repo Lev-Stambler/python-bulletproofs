@@ -4,7 +4,7 @@ from ..utils.transcript import Transcript
 from ..utils.commitments import vector_commitment, commitment
 from .rangeproof_verifier import Proof
 from ..innerproduct.inner_product_prover import NIProver
-from ..pippenger import PipP224
+from ..pippenger import Pipsecp256k1
 
 
 class AggregNIRangeProver:
@@ -92,7 +92,7 @@ class AggregNIRangeProver:
         P = (
             A
             + x * S
-            + PipP224.multiexp(
+            + Pipsecp256k1.multiexp(
                 gs + hsp,
                 [-z for _ in range(n * m)]
                 + [

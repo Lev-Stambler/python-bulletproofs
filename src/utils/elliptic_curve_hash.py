@@ -6,7 +6,7 @@ from hashlib import sha256, md5
 
 
 # TODO: think of something better...
-def elliptic_hash_P224(msg: bytes, CURVE: Curve):
+def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
     d, Q = gen_keypair(CURVE)
     return Q
 
@@ -28,7 +28,7 @@ def elliptic_hash_P224(msg: bytes, CURVE: Curve):
             return Point(x, y, CURVE) if b else Point(x, p - y, CURVE)
 
 # Takes in a curve of order ~ 2 ^ 252
-def _elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
+def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
     p = CURVE.p
     i = 0
     while True:
@@ -40,7 +40,6 @@ def _elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
             continue
 
         y_sq = (x ** 3 + CURVE.a * x + CURVE.b) % p
-        print(type(y_sq), type(p))
         y = mod_sqrt(y_sq, p)[0]
         
         if CURVE.is_point_on_curve((x, y)):

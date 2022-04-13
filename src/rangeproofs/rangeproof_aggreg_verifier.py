@@ -1,10 +1,10 @@
-from fastecdsa.curve import P224
+from fastecdsa.curve import secp256k1
 
 from ..utils.utils import ModP, point_to_b64
 from ..innerproduct.inner_product_verifier import Verifier1
-from ..pippenger import PipP224
+from ..pippenger import Pipsecp256k1
 
-CURVE = P224
+CURVE = secp256k1
 
 
 class Proof:
@@ -81,7 +81,7 @@ class AggregRangeVerifier:
 
         self.assertThat(
             proof.t_hat * g + proof.taux * h
-            == PipP224.multiexp(
+            == Pipsecp256k1.multiexp(
                 self.Vs + [g, proof.T1, proof.T2],
                 [z ** (j + 2) for j in range(m)] + [delta_yz, x, x ** 2],
             )
@@ -97,7 +97,7 @@ class AggregRangeVerifier:
         return (
             A
             + x * S
-            + PipP224.multiexp(
+            + Pipsecp256k1.multiexp(
                 gs + hsp,
                 [-z for _ in range(n * m)]
                 + [
