@@ -2,10 +2,10 @@
 
 from typing import Optional
 
-from .inner_product_verifier import Proof1, Proof2
-from ..utils.commitments import vector_commitment
-from ..utils.utils import inner_product
-from ..utils.transcript import Transcript
+from src.innerproduct.inner_product_verifier import Proof1, Proof2
+from src.utils.commitments import vector_commitment
+from src.utils.utils import inner_product
+from src.utils.transcript import Transcript
 
 
 class NIProver:

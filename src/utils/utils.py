@@ -5,6 +5,7 @@ from hashlib import blake2s
 from typing import List, Union
 import base64
 
+
 from fastecdsa.point import Point
 from fastecdsa.curve import secp256k1
 from fastecdsa.util import mod_sqrt
@@ -190,9 +191,23 @@ def to_cairo_big_int(a: int) -> tuple[int, int, int]:
     d0 = (a - d1 * CAIRO_BIG_INT_BASE - d2 * CAIRO_BIG_INT_BASE ** 2)
     return d0, d1, d2
 
-
 def from_cairo_big_int(d0: int, d1: int, d2: int) -> int:
     x2 = CAIRO_BIG_INT_BASE ** 2 * d2
     x1 = CAIRO_BIG_INT_BASE * d1
     x0 = d0
     return x2 + x1 + x0
+
+def set_ec_points(ids, segments, memory, name: str, ps: list[Point]):
+    ps_cairo = segments.add()
+    ids.get_or_set_value(name, ps_cairo)
+    for i, p in enumerate(ps):
+        x0, x1, x2 = to_cairo_big_int(p.x)
+        y0, y1, y2 = to_cairo_big_int(p.y)
+
+        memory[ps_cairo + 6 * i + 0] = x0
+        memory[ps_cairo + 6 * i + 1] = x1
+        memory[ps_cairo + 6 * i + 2] = x2
+
+        memory[ps_cairo + 6 * i + 3] = y0
+        memory[ps_cairo + 6 * i + 4] = y1
+        memory[ps_cairo + 6 * i + 5] = y2

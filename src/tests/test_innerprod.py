@@ -4,11 +4,11 @@ from random import randint
 from fastecdsa.curve import secp256k1, Curve
 
 from src.pippenger.group import EC
-from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
-from ..innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
-from ..utils.commitments import vector_commitment
-from ..utils.utils import ModP, mod_hash, inner_product
-from ..utils.elliptic_curve_hash import elliptic_hash_secp256k1
+from src.innerproduct.inner_product_prover import NIProver, FastNIProver2
+from src.innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
+from src.utils.commitments import vector_commitment
+from src.utils.utils import ModP, mod_hash, inner_product
+from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 
 PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
 CURVE: Curve = secp256k1

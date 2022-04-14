@@ -6,8 +6,8 @@ from src.pippenger.group import EC
 from src.utils.cairo_constants import PROOF_VAR_NAME
 
 from src.utils.transcript import Transcript
-from ..utils.utils import mod_hash, point_to_b64, ModP
-from ..pippenger import Pipsecp256k1
+from src.utils.utils import mod_hash, point_to_b64, ModP, to_cairo_big_int
+from src.pippenger import Pipsecp256k1
 
 SUPERCURVE: Curve = secp256k1
 
@@ -78,17 +78,24 @@ class Proof2:
             start_transcript
         )  # Start of transcript to be used if Protocol 2 is run in Protocol 1
 
-    def convert_to_cairo(self, ids, memory, segments):
+    def convert_to_cairo(self, ids, memory, segments, n_elems):
         """
            Convert the transcript into a cairo so that the verifier can 
            check the proof
         """
-        ids.proof_innerprod_2 = [
-            self.a.x,
-            self.b.x,
-        ]
+        a0, a1, a2 = to_cairo_big_int(self.a.x)
+        b0, b1, b2 = to_cairo_big_int(self.b.x)
+        ids.proof_innerprod_2.a.d0 = a0
+        ids.proof_innerprod_2.a.d1 = a1
+        ids.proof_innerprod_2.a.d2 = a2
 
-        Transcript.convert_to_cairo(ids, memory, segments, self.transcript.digest)
+        ids.proof_innerprod_2.b.d0 = b0
+        ids.proof_innerprod_2.b.d1 = b1
+        ids.proof_innerprod_2.b.d2 = b2
+
+        ids.proof_innerprod_2.n = n_elems
+
+        Transcript.convert_to_cairo(ids, memory, segments, self.transcript)
         # self.transcript.convert_to_cairo()
 
         # ids[PROOF_VAR_NAME]
@@ -179,6 +186,9 @@ class Verifier2:
             proof.Ls + proof.Rs,
             [xi ** 2 for xi in proof.xs] + [xi.inv() ** 2 for xi in proof.xs],
         )
+
+        print("PY X", LHS.x)
+        print("PY Y", RHS.y)
 
         self.assertThat(LHS == RHS)
         print("OK")

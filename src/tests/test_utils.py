@@ -3,14 +3,14 @@ import os
 from random import randint
 from fastecdsa.curve import secp256k1
 
-from ..utils.utils import (
+from src.utils.utils import (
     mod_hash,
     bytes_to_point,
     point_to_bytes,
     b64_to_point,
     point_to_b64,
 )
-from ..utils.elliptic_curve_hash import elliptic_hash_secp256k1
+from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 
 CURVE = secp256k1
 

@@ -1,5 +1,5 @@
 from fastecdsa.point import Point
-from ..pippenger import Pipsecp256k1
+from src.pippenger import Pipsecp256k1
 
 
 def commitment(g, h, x, r):

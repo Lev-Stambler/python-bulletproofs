@@ -1,10 +1,10 @@
 from typing import List
-from ..utils.utils import Point, ModP, inner_product, mod_hash
-from ..utils.transcript import Transcript
-from ..utils.commitments import vector_commitment, commitment
+from src.utils.utils import Point, ModP, inner_product, mod_hash
+from src.utils.transcript import Transcript
+from src.utils.commitments import vector_commitment, commitment
 from .rangeproof_verifier import Proof
-from ..innerproduct.inner_product_prover import NIProver
-from ..pippenger import Pipsecp256k1
+from src.innerproduct.inner_product_prover import NIProver
+from src.pippenger import Pipsecp256k1
 
 
 class AggregNIRangeProver:

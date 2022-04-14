@@ -1,8 +1,8 @@
 from fastecdsa.curve import secp256k1
 
-from ..utils.utils import ModP, point_to_b64
-from ..innerproduct.inner_product_verifier import Verifier1
-from ..pippenger import Pipsecp256k1
+from src.utils.utils import ModP, point_to_b64
+from src.innerproduct.inner_product_verifier import Verifier1
+from src.pippenger import Pipsecp256k1
 
 CURVE = secp256k1
 
