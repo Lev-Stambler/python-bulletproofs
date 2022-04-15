@@ -142,14 +142,14 @@ class Verifier2:
             tmp = ModP(1, self.prime)
             for j in range(0, log_n):
                 b = 1 if bin(i - 1)[2:].zfill(log_n)[j] == "1" else -1
-                tmp *= xs[j] if b == 1 else xs[j].inv()
+                curr_mult= xs[j] if b == 1 else xs[j].inv()
+                tmp *= curr_mult
             ss.append(tmp)
         return ss
 
     def verify_transcript(self):
         """Verify a transcript to assure Fiat-Shamir was done properly"""
         init_len = self.proof.start_transcript
-        print((len(self.proof.transcript) -1 ) // 3)
         n = len(self.g)
         log_n = n.bit_length() - 1
         Ls = self.proof.Ls

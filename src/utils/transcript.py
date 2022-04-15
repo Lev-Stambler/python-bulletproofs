@@ -70,8 +70,9 @@ class Transcript:
             if isinstance(i, Point):
                 int_list += EC.elem_to_cairo(i)
             elif isinstance(i, ModP):
+                print("adding modp", i)
                 int_list += list(to_cairo_big_int(i.x % i.p))
             else:
-                int_list += [i]
+                int_list += list(to_cairo_big_int(i))
 
         return int_list
