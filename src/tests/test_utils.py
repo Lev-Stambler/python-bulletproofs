@@ -1,7 +1,7 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1
+from src.pippenger import CURVE
 
 from src.utils.utils import (
     mod_hash,
@@ -11,8 +11,6 @@ from src.utils.utils import (
     point_to_b64,
 )
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
-
-CURVE = secp256k1
 
 
 class HashTest(unittest.TestCase):

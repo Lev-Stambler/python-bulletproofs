@@ -1,9 +1,9 @@
-from fastecdsa.curve import secp256k1
-
 from .pippenger import Pippenger
 from .group import EC
+from .curve import CURVE as _CURVE
 
-Pipsecp256k1 = Pippenger(EC(secp256k1))
-Pip256k1 = Pippenger(EC(secp256k1))
 
-__all__ = ["Pippenger", "EC", "Pipsecp256k1"]
+PipCURVE = Pippenger(EC(_CURVE))
+CURVE = _CURVE
+
+__all__ = ["Pippenger", "EC", "PipCURVE", "CURVE"]

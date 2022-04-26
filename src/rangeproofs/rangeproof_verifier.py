@@ -1,10 +1,7 @@
-from fastecdsa.curve import secp256k1
-
 from src.utils.utils import ModP, point_to_b64
 from src.innerproduct.inner_product_verifier import Verifier1
-from src.pippenger import Pipsecp256k1
+from src.pippenger import CURVE, PipCURVE
 
-CURVE = secp256k1
 
 
 class Proof:
@@ -89,7 +86,7 @@ class RangeVerifier:
         return (
             A
             + x * S
-            + Pipsecp256k1.multiexp(
+            + PipCURVE.multiexp(
                 gs + hsp,
                 [-z for _ in range(n)]
                 + [(z * (y ** i)) + ((z ** 2) * (2 ** i)) for i in range(n)],

@@ -1,16 +1,15 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1
 from src.innerproduct.inner_product_prover import NIProver, FastNIProver2
 from src.innerproduct.inner_product_verifier import Verifier1, Verifier2
+from src.pippenger import CURVE
 from src.utils.commitments import vector_commitment, commitment
 from src.utils.utils import mod_hash, inner_product, ModP
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 from src.rangeproofs import NIRangeProver, RangeVerifier
 
 
-CURVE = secp256k1
 p = CURVE.q
 
 

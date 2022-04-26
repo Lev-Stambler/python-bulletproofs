@@ -1,15 +1,14 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1
+from src.pippenger import CURVE
 from src.utils.commitments import commitment
 from src.utils.utils import mod_hash, ModP
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 from src.rangeproofs import AggregNIRangeProver, AggregRangeVerifier
 
 
-CURVE = secp256k1
-p = secp256k1.q
+p = CURVE.q
 
 
 class AggregRangeProofTest(unittest.TestCase):

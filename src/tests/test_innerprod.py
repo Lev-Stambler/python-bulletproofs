@@ -1,7 +1,8 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1, Curve
+from fastecdsa.curve import Curve
+from src.pippenger import CURVE
 
 from src.pippenger.group import EC
 from src.innerproduct.inner_product_prover import NIProver, FastNIProver2
@@ -11,8 +12,6 @@ from src.utils.utils import ModP, mod_hash, inner_product
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 
 PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
-CURVE: Curve = secp256k1
-
 
 class Protocol2Test(unittest.TestCase):
     def test_protocol_2(self):

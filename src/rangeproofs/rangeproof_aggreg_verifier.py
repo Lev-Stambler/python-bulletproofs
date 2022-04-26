@@ -1,11 +1,7 @@
-from fastecdsa.curve import secp256k1
 
 from src.utils.utils import ModP, point_to_b64
 from src.innerproduct.inner_product_verifier import Verifier1
-from src.pippenger import Pipsecp256k1
-
-CURVE = secp256k1
-
+from src.pippenger import CURVE, PipCURVE
 
 class Proof:
     """Proof class for Protocol 1"""
@@ -81,7 +77,7 @@ class AggregRangeVerifier:
 
         self.assertThat(
             proof.t_hat * g + proof.taux * h
-            == Pipsecp256k1.multiexp(
+            == PipCURVE.multiexp(
                 self.Vs + [g, proof.T1, proof.T2],
                 [z ** (j + 2) for j in range(m)] + [delta_yz, x, x ** 2],
             )
@@ -97,7 +93,7 @@ class AggregRangeVerifier:
         return (
             A
             + x * S
-            + Pipsecp256k1.multiexp(
+            + PipCURVE.multiexp(
                 gs + hsp,
                 [-z for _ in range(n * m)]
                 + [

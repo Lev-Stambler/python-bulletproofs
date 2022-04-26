@@ -1,5 +1,5 @@
 from fastecdsa.point import Point
-from src.pippenger import Pipsecp256k1
+from src.pippenger import PipCURVE
 
 
 def commitment(g, h, x, r):
@@ -10,7 +10,7 @@ def vector_commitment(g, h, a, b):
     assert len(g) == len(h) == len(a) == len(b)
     # return sum([ai*gi for ai,gi in zip(a,g)], Point(None,None,None)) \
     #         + sum([bi*hi for bi,hi in zip(b,h)], Point(None,None,None))
-    return Pipsecp256k1.multiexp(g + h, a + b)
+    return PipCURVE.multiexp(g + h, a + b)
 
 
 def _mult(a: int, g: Point) -> Point:

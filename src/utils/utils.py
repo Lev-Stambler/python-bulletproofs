@@ -7,12 +7,11 @@ import base64
 
 
 from fastecdsa.point import Point
-from fastecdsa.curve import secp256k1
 from fastecdsa.util import mod_sqrt
+from src.pippenger.curve import CURVE
 
 from src.utils.uint256 import Uint256
 
-CURVE = secp256k1
 BYTE_LENGTH = CURVE.q.bit_length() // 8
 
 CAIRO_BIG_INT_BASE = 2 ** 86
