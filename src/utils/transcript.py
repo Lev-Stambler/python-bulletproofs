@@ -1,7 +1,7 @@
 from fastecdsa.point import Point
-from src.pippenger.group import EC
+from src.group import EC
 
-from .utils import ModP, mod_hash, point_to_b64, point_to_cairo_ec_point, to_cairo_big_int
+from .utils import ModP, mod_hash
 
 
 # Transcript now uses a mod hash to separate and hash
@@ -70,8 +70,8 @@ class Transcript:
             if isinstance(i, Point):
                 int_list += EC.elem_to_cairo(i)
             elif isinstance(i, ModP):
-                int_list += list(to_cairo_big_int(i.x % i.p))
+                int_list += [i.x % i.p]
             else:
-                int_list += list(to_cairo_big_int(i))
+                int_list += [i]
 
         return int_list

@@ -5,10 +5,7 @@ from src.pippenger import CURVE
 
 from src.utils.utils import (
     mod_hash,
-    bytes_to_point,
     point_to_bytes,
-    b64_to_point,
-    point_to_b64,
 )
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 
@@ -32,20 +29,3 @@ class HashTest(unittest.TestCase):
             x = elliptic_hash_secp256k1(msg, CURVE)
             with self.subTest(msg=msg):
                 self.assertTrue(CURVE.is_point_on_curve((x.x, x.y)))
-
-
-class ConversionTest(unittest.TestCase):
-    def test_point_to_bytes(self):
-        for _ in range(100):
-            e = randint(0, CURVE.q)
-            x = e * CURVE.G
-            with self.subTest(e=e):
-                self.assertEqual(bytes_to_point(point_to_bytes(x)), x)
-
-    def test_point_to_b64(self):
-        for _ in range(100):
-            e = randint(0, CURVE.q)
-            x = e * CURVE.G
-            with self.subTest(e=e):
-                self.assertEqual(b64_to_point(point_to_b64(x)), x)
-

@@ -2,11 +2,11 @@
 
 from sympy import Curve, Point
 from src.pippenger import CURVE
-from src.pippenger.group import EC
+from src.group import EC
 from src.utils.cairo_constants import PROOF_VAR_NAME
 
 from src.utils.transcript import Transcript
-from src.utils.utils import mod_hash, point_to_b64, ModP, to_cairo_big_int
+from src.utils.utils import ModP
 from src.pippenger import PipCURVE
 
 SUPERCURVE: Curve = CURVE
@@ -83,15 +83,8 @@ class Proof2:
            Convert the transcript into a cairo so that the verifier can 
            check the proof
         """
-        a0, a1, a2 = to_cairo_big_int(self.a.x)
-        b0, b1, b2 = to_cairo_big_int(self.b.x)
-        ids.proof_innerprod_2.a.d0 = a0
-        ids.proof_innerprod_2.a.d1 = a1
-        ids.proof_innerprod_2.a.d2 = a2
-
-        ids.proof_innerprod_2.b.d0 = b0
-        ids.proof_innerprod_2.b.d1 = b1
-        ids.proof_innerprod_2.b.d2 = b2
+        ids.proof_innerprod_2.a = self.a.x
+        ids.proof_innerprod_2.b = self.b.x
 
         ids.proof_innerprod_2.n = n_elems
 

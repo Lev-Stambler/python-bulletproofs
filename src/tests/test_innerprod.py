@@ -4,7 +4,7 @@ from random import randint
 from fastecdsa.curve import Curve
 from src.pippenger import CURVE
 
-from src.pippenger.group import EC
+from src.group import EC
 from src.innerproduct.inner_product_prover import NIProver, FastNIProver2
 from src.innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
 from src.utils.commitments import vector_commitment

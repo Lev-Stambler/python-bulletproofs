@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from src.utils.utils import to_cairo_big_int
-
 from src.utils.utils import ModP
 from fastecdsa.curve import Curve
 from fastecdsa.point import Point
@@ -39,12 +37,10 @@ class EC(Group):
         """
             Take in an ec point and convert it into a cairo struct of type `EcPoint`
             struct EcPoint:
-                member x : BigInt3
-                member y : BigInt3
+                member x : felt
+                member y : felt
             end
-            @return a list of 6 felt elements
+            @return a list of 2 felt elements
         """
-        x = to_cairo_big_int(p.x)
-        y = to_cairo_big_int(p.y)
-        return list(x) + list(y)
+        return [p.x, p.y]
         

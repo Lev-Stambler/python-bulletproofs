@@ -1,28 +1,14 @@
 """Contains various utilities"""
 
-from sympy import Mod
 from hashlib import blake2s
 from typing import List, Union
-import base64
 
 
 from fastecdsa.point import Point
-from fastecdsa.util import mod_sqrt
-from src.pippenger.curve import CURVE
 
-from src.utils.uint256 import Uint256
 
-BYTE_LENGTH = CURVE.q.bit_length() // 8
 
-CAIRO_BIG_INT_BASE = 2 ** 86
 CAIRO_PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
-
-
-# Take in a point and return 6 numbers d_x_0, d_x_1, d_x_2, d_y_0, d_y_1, d_y_2,
-# The first three representing x's big int 3 coefficients and the second three
-# representing y big int 3 coefficients
-def point_to_cairo_ec_point(p: Point):
-    pass
 
 
 def egcd(a, b):
@@ -134,79 +120,15 @@ def mod_hash(msg: Union[bytes, list[int]], p: int, p_computation=CAIRO_PRIME) ->
         ret = (ret * ModP(2 ** 32, p_computation)) + ModP(i, p_computation)
     return ModP(ret.x, p)
 
-
-def point_to_bytes(g: Point) -> bytes:
-    """Takes an EC point and returns the compressed bytes representation"""
-    if g == Point.IDENTITY_ELEMENT:
-        return b"\x00"
-    x_enc = g.x.to_bytes(BYTE_LENGTH, "big")
-    prefix = b"\x03" if g.y % 2 else b"\x02"
-    return prefix + x_enc
-
-
-def point_to_b64(g: Point) -> bytes:
-    """Takes an EC point and returns the base64 compressed bytes representation"""
-    return base64.b64encode(point_to_bytes(g))
-
-
-def b64_to_point(s: bytes) -> Point:
-    """Takes a base64 compressed bytes representation and returns the corresponding point"""
-    return bytes_to_point(base64.b64decode(s))
-
-
-def bytes_to_point(b: bytes) -> Point:
-    """Takes a compressed bytes representation and returns the corresponding point"""
-    if b == 0:
-        return Point.IDENTITY_ELEMENT
-    p = CURVE.p
-    yp, x_enc = b[0], b[1:]
-    yp = 0 if yp == 2 else 1
-    x = int.from_bytes(x_enc, "big")
-    y = mod_sqrt((x ** 3 + CURVE.a * x + CURVE.b) % p, p)[0]
-    if y % 2 == yp:
-        return Point(x, y, CURVE)
-    else:
-        return Point(x, p - y, CURVE)
-
-
 def inner_product(a: List[ModP], b: List[ModP]) -> ModP:
     """Inner-product of vectors in Z_p"""
     assert len(a) == len(b)
     return sum([ai * bi for ai, bi in zip(a, b)], ModP(0, a[0].p))
 
 
-def to_cairo_big_int(a: int) -> tuple[int, int, int]:
-    """
-        Takes in an int and returns a big int tuple of (d0, d1, d2)
-        where d0 + BASE * d1 + BASE**2 * d2
-        struct BigInt3:
-            member d0 : felt
-            member d1 : felt
-            member d2 : felt
-        end
-    """
-    d2 = a // CAIRO_BIG_INT_BASE ** 2
-    d1 = (a - d2 * CAIRO_BIG_INT_BASE ** 2) // CAIRO_BIG_INT_BASE
-    d0 = (a - d1 * CAIRO_BIG_INT_BASE - d2 * CAIRO_BIG_INT_BASE ** 2)
-    return d0, d1, d2
-
-def from_cairo_big_int(d0: int, d1: int, d2: int) -> int:
-    x2 = CAIRO_BIG_INT_BASE ** 2 * d2
-    x1 = CAIRO_BIG_INT_BASE * d1
-    x0 = d0
-    return x2 + x1 + x0
-
 def set_ec_points(ids, segments, memory, name: str, ps: list[Point]):
-    ps_cairo = segments.add()
-    ids.get_or_set_value(name, ps_cairo)
+    points_cairo = segments.add()
+    ids.get_or_set_value(name, points_cairo)
     for i, p in enumerate(ps):
-        x0, x1, x2 = to_cairo_big_int(p.x)
-        y0, y1, y2 = to_cairo_big_int(p.y)
-
-        memory[ps_cairo + 6 * i + 0] = x0
-        memory[ps_cairo + 6 * i + 1] = x1
-        memory[ps_cairo + 6 * i + 2] = x2
-
-        memory[ps_cairo + 6 * i + 3] = y0
-        memory[ps_cairo + 6 * i + 4] = y1
-        memory[ps_cairo + 6 * i + 5] = y2
+        memory[points_cairo + 2 * i + 0] = p.x
+        memory[points_cairo + 2 * i + 1] = p.y

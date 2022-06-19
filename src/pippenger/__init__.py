@@ -1,5 +1,5 @@
 from .pippenger import Pippenger
-from .group import EC
+from ..group import EC
 from .curve import CURVE as _CURVE
 
 
