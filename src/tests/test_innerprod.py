@@ -11,8 +11,8 @@ from src.utils.commitments import vector_commitment
 from src.utils.utils import ModP, mod_hash, inner_product
 from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 
-PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
 
+# python3 -m unittest -v src.tests.test_innerprod.Protocol2Test.test_protocol_2
 class Protocol2Test(unittest.TestCase):
     def test_protocol_2(self):
         for i in range(9):
