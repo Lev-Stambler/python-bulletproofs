@@ -3,6 +3,7 @@ from fastecdsa.point import Point
 
 # Thanks to https://crypto.stackexchange.com/questions/95666/how-to-find-out-what-the-order-of-the-base-point-of-the-elliptic-curve-is
 # for providing the order of the base point
+# Note that Q < p
 Q = 3618502788666131213697322783095070105526743751716087489154079457884512865583
 
 p = 3618502788666131213697322783095070105623107215331596699973092056135872020481
