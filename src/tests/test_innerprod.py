@@ -15,9 +15,10 @@ from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
 # python3 -m unittest -v src.tests.test_innerprod.Protocol2Test.test_protocol_2
 class Protocol2Test(unittest.TestCase):
     def test_protocol_2(self):
-        for i in range(9):
+        i_range = [1]
+        for i in i_range:
             # seeds = [os.urandom(10) for _ in range(6)]
-            seeds = [b"a" for _ in range(6)]
+            seeds = [b"a" for _ in range(6)] # Keep consistent seeds for debugging
             p = SUPERCURVE.q#2 ** 251 + 17 * 2 ** 192 + 1
             N = 2 ** i
             g = [elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(N)]

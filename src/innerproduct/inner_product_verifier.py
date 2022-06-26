@@ -179,6 +179,7 @@ class Verifier2:
             proof.Ls + proof.Rs,
             [xi ** 2 for xi in proof.xs] + [xi.inv() ** 2 for xi in proof.xs],
         )
+        print("PY LHS", LHS.x, LHS.y)
 
         self.assertThat(LHS == RHS)
         print("OK")
