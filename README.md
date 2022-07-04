@@ -1,4 +1,4 @@
 # python-bulletproofs
-Python3 implementation of Bulletproofs - non-interactive zero-knowledge proof protocol with very short proofs and without a trusted setup.
+Forked from [Python Bulletproofs](https://github.com/wborgeaud/python-bulletproofs) and modified to support Cairo and the Starknet curve.
 
 Following the paper [Bulletproofs: Short Proofs for Confidential Transactions and More](https://eprint.iacr.org/2017/1066.pdf).
