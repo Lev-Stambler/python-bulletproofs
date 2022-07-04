@@ -20,26 +20,21 @@ class Transcript:
            Convert the transcript into a cairo so that the verifier can 
            check the transcript
         """
+        # Get the felt list not including the seed
         felt_list = Transcript.digest_to_int_list(digest[1:])
 
         ids.transcript = transcript = segments.add()
 
-        # set the seed
-        memory[transcript] = digest[0]
         # set number of entries to be the number of points/ mod p ints - 1 / 3
         # This is because there is 1 entry for the seed, and for every L, R, x,
         # there is one entry
         assert (len(digest) - 1) % 3 == 0
-        memory[transcript + 1] = (len(digest) - 1) // 3
+        memory[transcript] = (len(digest) - 1) // 3
+        # set the seed
+        memory[transcript + 1] = digest[0]
 
-        ids.transcript_entries = transcript_entries = segments.add()
-
-        # Set the transcript
-        memory[transcript + 2] = transcript_entries
-
-        #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
         for i, val in enumerate(felt_list):
-            memory[transcript_entries + i] = val
+            memory[transcript + (i + 2)] = val
 
     def add_point(self, g: Point):
         """Add an elliptic curve point to the transcript"""

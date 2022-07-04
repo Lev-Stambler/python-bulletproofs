@@ -99,7 +99,6 @@ def modular_sqrt(a, p):
         r = m
 
 
-# # TODO: think of something better...
 def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
     # d, Q = gen_keypair(CURVE)
     # return Q
