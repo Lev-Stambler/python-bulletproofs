@@ -99,7 +99,7 @@ def modular_sqrt(a, p):
         r = m
 
 
-def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
+def elliptic_hash(msg: bytes, CURVE: Curve):
     # d, Q = gen_keypair(CURVE)
     # return Q
 
@@ -110,7 +110,7 @@ def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
     point = Point(CURVE.gx, CURVE.gy, CURVE) * x
     return point
 # Takes in a curve of order ~ 2 ^ 252
-# def elliptic_hash_secp256k1(msg: bytes, CURVE: Curve):
+# def elliptic_hash(msg: bytes, CURVE: Curve):
 #     p = CURVE.p
 #     i = 0
 #     while True:

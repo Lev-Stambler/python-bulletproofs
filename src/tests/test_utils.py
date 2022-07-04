@@ -7,7 +7,7 @@ from src.utils.utils import (
     mod_hash,
     point_to_bytes,
 )
-from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
+from src.utils.elliptic_curve_hash import elliptic_hash
 
 
 class HashTest(unittest.TestCase):
@@ -23,9 +23,9 @@ class HashTest(unittest.TestCase):
             with self.subTest(msg=msg, p=p):
                 self.assertNotEqual(x.x, 0)
 
-    def test_elliptic_hash_secp256k1(self):
+    def test_elliptic_hash(self):
         for _ in range(100):
             msg = os.urandom(10)
-            x = elliptic_hash_secp256k1(msg, CURVE)
+            x = elliptic_hash(msg, CURVE)
             with self.subTest(msg=msg):
                 self.assertTrue(CURVE.is_point_on_curve((x.x, x.y)))

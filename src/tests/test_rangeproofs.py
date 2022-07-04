@@ -6,7 +6,7 @@ from src.innerproduct.inner_product_verifier import Verifier1, Verifier2
 from src.pippenger import CURVE
 from src.utils.commitments import vector_commitment, commitment
 from src.utils.utils import mod_hash, inner_product, ModP
-from src.utils.elliptic_curve_hash import elliptic_hash_secp256k1
+from src.utils.elliptic_curve_hash import elliptic_hash
 from src.rangeproofs import NIRangeProver, RangeVerifier
 
 
@@ -18,11 +18,11 @@ class RangeProofTest(unittest.TestCase):
         for _ in range(10):
             seeds = [os.urandom(10) for _ in range(7)]
             v, n = ModP(randint(0, 2 ** 16 - 1), p), 16
-            gs = [elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(n)]
-            hs = [elliptic_hash_secp256k1(str(i).encode() + seeds[1], CURVE) for i in range(n)]
-            g = elliptic_hash_secp256k1(seeds[2], CURVE)
-            h = elliptic_hash_secp256k1(seeds[3], CURVE)
-            u = elliptic_hash_secp256k1(seeds[4], CURVE)
+            gs = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(n)]
+            hs = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(n)]
+            g = elliptic_hash(seeds[2], CURVE)
+            h = elliptic_hash(seeds[3], CURVE)
+            u = elliptic_hash(seeds[4], CURVE)
             gamma = mod_hash(seeds[5], p)
             V = commitment(g, h, v, gamma)
             Prov = NIRangeProver(v, n, g, h, gs, hs, gamma, u, CURVE, seeds[6])
@@ -37,14 +37,14 @@ class RangeProofTest(unittest.TestCase):
                 seeds = [os.urandom(10) for _ in range(7)]
                 v, n = ModP(randint(0, 2 ** (2 ** i) - 1), p), 2 ** i
                 gs = [
-                    elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(n)
+                    elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(n)
                 ]
                 hs = [
-                    elliptic_hash_secp256k1(str(i).encode() + seeds[1], CURVE) for i in range(n)
+                    elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(n)
                 ]
-                g = elliptic_hash_secp256k1(seeds[2], CURVE)
-                h = elliptic_hash_secp256k1(seeds[3], CURVE)
-                u = elliptic_hash_secp256k1(seeds[4], CURVE)
+                g = elliptic_hash(seeds[2], CURVE)
+                h = elliptic_hash(seeds[3], CURVE)
+                u = elliptic_hash(seeds[4], CURVE)
                 gamma = mod_hash(seeds[5], p)
                 V = commitment(g, h, v, gamma)
                 Prov = NIRangeProver(v, n, g, h, gs, hs, gamma, u, CURVE, seeds[6])
@@ -56,11 +56,11 @@ class RangeProofTest(unittest.TestCase):
     def test_prover_cheating_false_v(self):
         seeds = [os.urandom(10) for _ in range(7)]
         v, n = ModP(randint(2**16,2**17), p), 16
-        gs = [elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(n)]
-        hs = [elliptic_hash_secp256k1(str(i).encode() + seeds[1], CURVE) for i in range(n)]
-        g = elliptic_hash_secp256k1(seeds[2], CURVE)
-        h = elliptic_hash_secp256k1(seeds[3], CURVE)
-        u = elliptic_hash_secp256k1(seeds[4], CURVE)
+        gs = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(n)]
+        hs = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(n)]
+        g = elliptic_hash(seeds[2], CURVE)
+        h = elliptic_hash(seeds[3], CURVE)
+        u = elliptic_hash(seeds[4], CURVE)
         gamma = mod_hash(seeds[5], p)
         V = commitment(g, h, v, gamma)
         Prov = NIRangeProver(v, n, g, h, gs, hs, gamma, u, CURVE, seeds[6])
@@ -73,11 +73,11 @@ class RangeProofTest(unittest.TestCase):
     def test_prover_cheating_false_commitment(self):
         seeds = [os.urandom(10) for _ in range(7)]
         v, n = ModP(randint(0,2**16), p), 16
-        gs = [elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(n)]
-        hs = [elliptic_hash_secp256k1(str(i).encode() + seeds[1], CURVE) for i in range(n)]
-        g = elliptic_hash_secp256k1(seeds[2], CURVE)
-        h = elliptic_hash_secp256k1(seeds[3], CURVE)
-        u = elliptic_hash_secp256k1(seeds[4], CURVE)
+        gs = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(n)]
+        hs = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(n)]
+        g = elliptic_hash(seeds[2], CURVE)
+        h = elliptic_hash(seeds[3], CURVE)
+        u = elliptic_hash(seeds[4], CURVE)
         gamma = mod_hash(seeds[5], p)
         V = commitment(g, h, v+1, gamma)
         Prov = NIRangeProver(v, n, g, h, gs, hs, gamma, u, CURVE, seeds[6])
@@ -90,11 +90,11 @@ class RangeProofTest(unittest.TestCase):
     def test_prover_cheating_false_transcript1(self):
         seeds = [os.urandom(10) for _ in range(7)]
         v, n = ModP(randint(0,2**16), p), 16
-        gs = [elliptic_hash_secp256k1(str(i).encode() + seeds[0], CURVE) for i in range(n)]
-        hs = [elliptic_hash_secp256k1(str(i).encode() + seeds[1], CURVE) for i in range(n)]
-        g = elliptic_hash_secp256k1(seeds[2], CURVE)
-        h = elliptic_hash_secp256k1(seeds[3], CURVE)
-        u = elliptic_hash_secp256k1(seeds[4], CURVE)
+        gs = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(n)]
+        hs = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(n)]
+        g = elliptic_hash(seeds[2], CURVE)
+        h = elliptic_hash(seeds[3], CURVE)
+        u = elliptic_hash(seeds[4], CURVE)
         gamma = mod_hash(seeds[5], p)
         V = commitment(g, h, v+1, gamma)
         Prov = NIRangeProver(v, n, g, h, gs, hs, gamma, u, CURVE, seeds[6])

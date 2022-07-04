@@ -89,26 +89,6 @@ class Proof2:
         ids.proof_innerprod_2.n = n_elems
 
         Transcript.convert_to_cairo(ids, memory, segments, self.transcript)
-        # self.transcript.convert_to_cairo()
-
-        # ids[PROOF_VAR_NAME]
-
-    # def convert_to_cairo(ids, memory, segments, digest: list):
-    #     """
-    #        Convert the transcript into a cairo so that the verifier can
-    #        check the transcript
-    #     """
-    #     felt_list = Transcript.digest_to_int_list(digest[1:])
-
-    #     ids.n_rounds = 10
-    #     ids.transcript_seed = digest[0]
-    #     #ids[TRANSCRIPT_LEN_NAME] = len(felt_list)
-    #     ids.transcript_entries = transcript_entries = segments.add()
-    #     for i, val in enumerate(felt_list):
-    #         memory[transcript_entries + i] = val
-
-    #     pass
-
 
 class Verifier2:
     """Verifier class for Protocol 2"""
