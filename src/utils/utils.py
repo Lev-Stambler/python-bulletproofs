@@ -130,4 +130,4 @@ def set_ec_points(ids, segments, memory, name: str, ps: list[Point]):
     for i, p in enumerate(ps):
         memory[points_cairo + 2 * i + 0] = p.x
         memory[points_cairo + 2 * i + 1] = p.y
-    
+ 
