@@ -2,17 +2,18 @@
 
 from typing import Optional
 
-from .inner_product_verifier import Proof1, Proof2
-from ..utils.commitments import vector_commitment
-from ..utils.utils import inner_product
-from ..utils.transcript import Transcript
+from src.innerproduct.inner_product_verifier import Proof1, Proof2
+from src.utils.commitments import vector_commitment
+from src.utils.utils import inner_product
+from src.utils.transcript import Transcript
 
 
 class NIProver:
     """Class simulating a NI prover for the inner-product argument (Protocol 1)"""
-    def __init__(self, g, h, u, P, c, a, b, group, seed=b""):
+    def __init__(self, g, h, u, P, c, a, b, group, prime=None, seed=0):
         assert len(g) == len(h) == len(a) == len(b)
         self.g = g
+        self.prime = group.q if prime is None else prime
         self.h = h
         self.u = u
         self.P = P
@@ -28,7 +29,7 @@ class NIProver:
         Returns a Proof1 object.
         """
         # x = mod_hash(self.transcript.digest, self.group.order)
-        x = self.transcript.get_modp(self.group.q)
+        x = self.transcript.get_modp(self.prime)
         self.transcript.add_number(x)
         P_new = self.P + (x * self.c) * self.u
         u_new = x * self.u
@@ -47,11 +48,12 @@ class NIProver:
 
 class FastNIProver2:
     """Class simulating a NI prover for the inner-product argument (Protocol 2)"""
-    def __init__(self, g, h, u, P, a, b, group, transcript: Optional[bytes]=None):
+    def __init__(self, g, h, u, P, a, b, group, prime=None, transcript: Optional[list[int]]=None):
         assert len(g) == len(h) == len(a) == len(b)
         assert len(a) & (len(a) - 1) == 0
         self.log_n = len(a).bit_length() - 1
         self.n = len(a)
+        self.prime = group.q if prime is None else prime
         self.g = g
         self.h = h
         self.u = u
@@ -62,7 +64,7 @@ class FastNIProver2:
         self.transcript = Transcript()
         if transcript:
             self.transcript.digest += transcript
-            self.init_transcript_length = len(transcript.split(b"&"))
+            self.init_transcript_length = len(self.transcript.digest)
         else:
             self.init_transcript_length = 1
 
@@ -101,7 +103,7 @@ class FastNIProver2:
             Rs.append(R)
             self.transcript.add_list_points([L, R])
             # x = mod_hash(self.transcript.digest, self.group.order)
-            x = self.transcript.get_modp(self.group.q)
+            x = self.transcript.get_modp(self.prime)
             xs.append(x)
             self.transcript.add_number(x)
             gp = [x.inv() * gi_fh + x * gi_sh for gi_fh, gi_sh in zip(gp[:np], gp[np:])]

@@ -1,10 +1,15 @@
 """Contains classes for the prover of an inner-product argument"""
 
-from fastecdsa.curve import secp256k1, Curve
-from ..utils.utils import mod_hash, point_to_b64, ModP
-from ..pippenger import PipSECP256k1
+from sympy import Curve, Point
+from src.pippenger import CURVE
+from src.group import EC
+from src.utils.cairo_constants import PROOF_VAR_NAME
 
-SUPERCURVE: Curve = secp256k1
+from src.utils.transcript import Transcript
+from src.utils.utils import ModP
+from src.pippenger import PipCURVE
+
+SUPERCURVE: Curve = CURVE
 
 
 class Proof1:
@@ -20,13 +25,14 @@ class Proof1:
 class Verifier1:
     """Verifier class for Protocol 1"""
 
-    def __init__(self, g, h, u, P, c, proof1):
+    def __init__(self, g, h, u, P, c, proof1, prime=None):
         self.g = g
         self.h = h
         self.u = u
         self.P = P
         self.c = c
         self.proof1 = proof1
+        self.prime = SUPERCURVE.q if prime is None else prime
 
     def assertThat(self, expr: bool):
         """Assert that expr is truthy else raise exception"""
@@ -35,19 +41,19 @@ class Verifier1:
 
     def verify_transcript(self):
         """Verify a transcript to assure Fiat-Shamir was done properly"""
-        lTranscript = self.proof1.transcript.split(b"&")
+        lTranscript = self.proof1.transcript
         self.assertThat(
             lTranscript[1]
-            == str(mod_hash(b"&".join(lTranscript[:1]) + b"&", SUPERCURVE.q)).encode()
+            == Transcript.digest_to_hash(lTranscript[:1], self.prime)
         )
 
     def verify(self):
         """Verifies the proof given by a prover. Raises an execption if it is invalid"""
         self.verify_transcript()
 
-        lTranscript = self.proof1.transcript.split(b"&")
+        lTranscript = self.proof1.transcript
         x = lTranscript[1]
-        x = ModP(int(x), SUPERCURVE.q)
+        x = ModP(x, self.prime)
         self.assertThat(self.proof1.P_new == self.P + (x * self.c) * self.u)
         self.assertThat(self.proof1.u_new == x * self.u)
 
@@ -61,7 +67,7 @@ class Verifier1:
 class Proof2:
     """Proof class for Protocol 2"""
 
-    def __init__(self, a, b, xs, Ls, Rs, transcript, start_transcript: int = 0):
+    def __init__(self, a: ModP, b: ModP, xs: list[ModP], Ls: list[ModP], Rs: list[ModP], transcript: Transcript, start_transcript: int = 0, prime=None):
         self.a = a
         self.b = b
         self.xs = xs
@@ -72,13 +78,25 @@ class Proof2:
             start_transcript
         )  # Start of transcript to be used if Protocol 2 is run in Protocol 1
 
+    def convert_to_cairo(self, ids, memory, segments, n_elems):
+        """
+           Convert the transcript into a cairo so that the verifier can 
+           check the proof
+        """
+        ids.proof_innerprod_2.a = self.a.x
+        ids.proof_innerprod_2.b = self.b.x
+
+        ids.proof_innerprod_2.n = n_elems
+
+        Transcript.convert_to_cairo(ids, memory, segments, self.transcript)
 
 class Verifier2:
     """Verifier class for Protocol 2"""
 
-    def __init__(self, g, h, u, P, proof: Proof2):
+    def __init__(self, g, h, u, P, proof: Proof2, prime=None):
         self.g = g
         self.h = h
+        self.prime = SUPERCURVE.q if prime is None else prime
         self.u = u
         self.P = P
         self.proof = proof
@@ -94,10 +112,11 @@ class Verifier2:
         log_n = n.bit_length() - 1
         ss = []
         for i in range(1, n + 1):
-            tmp = ModP(1, SUPERCURVE.q)
+            tmp = ModP(1, self.prime)
             for j in range(0, log_n):
                 b = 1 if bin(i - 1)[2:].zfill(log_n)[j] == "1" else -1
-                tmp *= xs[j] if b == 1 else xs[j].inv()
+                curr_mult= xs[j] if b == 1 else xs[j].inv()
+                tmp *= curr_mult
             ss.append(tmp)
         return ss
 
@@ -109,19 +128,18 @@ class Verifier2:
         Ls = self.proof.Ls
         Rs = self.proof.Rs
         xs = self.proof.xs
-        lTranscript = self.proof.transcript.split(b"&")
+        lTranscript = self.proof.transcript
         for i in range(log_n):
-            self.assertThat(lTranscript[init_len + i * 3] == point_to_b64(Ls[i]))
-            self.assertThat(lTranscript[init_len + i * 3 + 1] == point_to_b64(Rs[i]))
+            self.assertThat(lTranscript[init_len + i * 3] == Ls[i])
+            self.assertThat(lTranscript[init_len + i * 3 + 1] == Rs[i])
             self.assertThat(
-                str(xs[i]).encode()
+                xs[i]
                 == lTranscript[init_len + i * 3 + 2]
-                == str(
-                    mod_hash(
-                        b"&".join(lTranscript[: init_len + i * 3 + 2]) + b"&",
-                        SUPERCURVE.q,
-                    )
-                ).encode()
+                ==
+                Transcript.digest_to_hash(
+                    lTranscript[: init_len + i * 3 + 2],
+                    self.prime,
+                )
             )
 
     def verify(self):
@@ -129,7 +147,7 @@ class Verifier2:
         self.verify_transcript()
 
         proof = self.proof
-        Pip = PipSECP256k1
+        Pip = PipCURVE
         ss = self.get_ss(self.proof.xs)
         LHS = Pip.multiexp(
             self.g + self.h + [self.u],

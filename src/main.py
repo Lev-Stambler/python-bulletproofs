@@ -1,7 +1,8 @@
 """Various tests"""
 
-from fastecdsa.curve import secp256k1
 import os
+
+from src.pippenger import CURVE
 from .utils.utils import mod_hash, inner_product, ModP
 from .utils.commitments import vector_commitment, commitment
 from .utils.elliptic_curve_hash import elliptic_hash
@@ -12,7 +13,6 @@ from .rangeproofs.rangeproof_aggreg_prover import AggregNIRangeProver
 from .rangeproofs.rangeproof_aggreg_verifier import AggregRangeVerifier
 
 
-CURVE = secp256k1
 p = CURVE.q
 
 # seeds = [os.urandom(10) for _ in range(7)]

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from .modp import ModP
+
+from src.utils.utils import ModP
 from fastecdsa.curve import Curve
+from fastecdsa.point import Point
 
 
 class Group(ABC):
@@ -30,3 +32,15 @@ class EC(Group):
 
     def mult(self, x, y):
         return x + y
+
+    def elem_to_cairo(p: Point) -> list[int]:
+        """
+            Take in an ec point and convert it into a cairo struct of type `EcPoint`
+            struct EcPoint:
+                member x : felt
+                member y : felt
+            end
+            @return a list of 2 felt elements
+        """
+        return [p.x, p.y]
+        

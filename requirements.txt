@@ -26,3 +26,4 @@ typing-extensions==3.7.4
 urllib3==1.25.3
 wrapt==1.11.2
 yapf==0.28.0
+eth_hash==0.3.2

@@ -1,22 +1,25 @@
 import unittest
 import os
 from random import randint
-from fastecdsa.curve import secp256k1, Curve
-from ..innerproduct.inner_product_prover import NIProver, FastNIProver2
-from ..innerproduct.inner_product_verifier import Verifier1, Verifier2
-from ..utils.commitments import vector_commitment
-from ..utils.utils import mod_hash, inner_product
-from ..utils.elliptic_curve_hash import elliptic_hash
+from fastecdsa.curve import Curve
+from src.pippenger import CURVE
+
+from src.group import EC
+from src.innerproduct.inner_product_prover import NIProver, FastNIProver2
+from src.innerproduct.inner_product_verifier import SUPERCURVE, Verifier1, Verifier2
+from src.utils.commitments import vector_commitment
+from src.utils.utils import ModP, mod_hash, inner_product
+from src.utils.elliptic_curve_hash import elliptic_hash
 
 
-CURVE: Curve = secp256k1
-
-
+# python3 -m unittest -v src.tests.test_innerprod.Protocol2Test.test_protocol_2
 class Protocol2Test(unittest.TestCase):
     def test_protocol_2(self):
-        for i in range(9):
-            seeds = [os.urandom(10) for _ in range(6)]
-            p = CURVE.q
+        i_range = [1]
+        for i in i_range:
+            # seeds = [os.urandom(10) for _ in range(6)]
+            seeds = [b"a" for _ in range(6)] # Keep consistent seeds for debugging
+            p = SUPERCURVE.q#2 ** 251 + 17 * 2 ** 192 + 1
             N = 2 ** i
             g = [elliptic_hash(str(i).encode() + seeds[0], CURVE) for i in range(N)]
             h = [elliptic_hash(str(i).encode() + seeds[1], CURVE) for i in range(N)]
@@ -24,9 +27,10 @@ class Protocol2Test(unittest.TestCase):
             a = [mod_hash(str(i).encode() + seeds[3], p) for i in range(N)]
             b = [mod_hash(str(i).encode() + seeds[4], p) for i in range(N)]
             P = vector_commitment(g, h, a, b) + inner_product(a, b) * u
-            Prov = FastNIProver2(g, h, u, P, a, b, CURVE)
+
+            Prov = FastNIProver2(g, h, u, P, a, b, CURVE, prime=p)
             proof = Prov.prove()
-            Verif = Verifier2(g, h, u, P, proof)
+            Verif = Verifier2(g, h, u, P, proof, prime=p)
             with self.subTest(seeds=seeds, N=N):
                 self.assertTrue(Verif.verify())
 
@@ -99,7 +103,7 @@ class Protocol2Test(unittest.TestCase):
 
 
 class InnerProductArgumentTest(unittest.TestCase):
-    def test_different_seeds(self):
+    def test_different_seeds_innerprod(self):
         for _ in range(10):
             seeds = [os.urandom(10) for _ in range(6)]
             p = CURVE.q

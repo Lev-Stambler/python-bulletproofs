@@ -1,15 +1,14 @@
 """Contains various utilities"""
 
-from hashlib import sha256
-from typing import List
-import base64
+from hashlib import blake2s
+from typing import List, Union
+
 
 from fastecdsa.point import Point
-from fastecdsa.curve import secp256k1
-from fastecdsa.util import mod_sqrt
 
-CURVE = secp256k1
-BYTE_LENGTH = CURVE.q.bit_length() // 8
+
+
+CAIRO_PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
 
 
 def egcd(a, b):
@@ -25,7 +24,10 @@ class ModP:
     """Class representing an integer mod p"""
 
     def __init__(self, x, p):
-        self.x = x
+        if isinstance(x, int):
+            self.x = x
+        else:
+            self.x = x.x
         self.p = p
 
     def __add__(self, y):
@@ -39,11 +41,11 @@ class ModP:
 
     def __mul__(self, y):
         if isinstance(y, int):
-            return ModP(self.x * y, self.p)
+            return ModP((self.x % self.p) * (y % self.p), self.p)
         if isinstance(y, Point):
             return self.x * y
         assert self.p == y.p
-        return ModP((self.x * y.x) % self.p, self.p)
+        return ModP(((self.x % self.p) * (y.x % y.p)) % self.p, self.p)
 
     def __sub__(self, y):
         if isinstance(y, int):
@@ -58,6 +60,8 @@ class ModP:
         return ModP(pow(self.x, n, self.p), self.p)
 
     def __mod__(self, other):
+        if isinstance(other, ModP):
+            return self.x % other.x
         return self.x % other
 
     def __neg__(self):
@@ -70,8 +74,17 @@ class ModP:
             raise Exception("modular inverse does not exist")
         else:
             return ModP(a % self.p, self.p)
+    
+    def to_uint256(self):
+        x = self.x % self.p
+        split = 2 ** 128
+        high = x // split
+        low = x % split
+        return [low, high]
 
     def __eq__(self, y):
+        if isinstance(y, int):
+            y = ModP(y, self.p)
         return (self.p == y.p) and (self.x % self.p == y.x % self.p)
 
     def __str__(self):
@@ -81,57 +94,40 @@ class ModP:
         return str(self.x)
 
 
-def mod_hash(msg: bytes, p: int, non_zero: bool = True) -> ModP:
-    """Takes a message and a prime and returns a hash in ModP"""
-    i = 0
-    while True:
-        i += 1
-        prefixed_msg = str(i).encode() + msg
-        h = sha256(prefixed_msg).hexdigest()
-        x = int(h, 16) % 2 ** p.bit_length()
-        if x >= p:
-            continue
-        elif non_zero and x == 0:
-            continue
-        else:
-            return ModP(x, p)
-
-
-def point_to_bytes(g: Point) -> bytes:
-    """Takes an EC point and returns the compressed bytes representation"""
-    if g == Point.IDENTITY_ELEMENT:
-        return b"\x00"
-    x_enc = g.x.to_bytes(BYTE_LENGTH, "big")
-    prefix = b"\x03" if g.y % 2 else b"\x02"
-    return prefix + x_enc
-
-
-def point_to_b64(g: Point) -> bytes:
-    """Takes an EC point and returns the base64 compressed bytes representation"""
-    return base64.b64encode(point_to_bytes(g))
-
-
-def b64_to_point(s: bytes) -> Point:
-    """Takes a base64 compressed bytes representation and returns the corresponding point"""
-    return bytes_to_point(base64.b64decode(s))
-
-
-def bytes_to_point(b: bytes) -> Point:
-    """Takes a compressed bytes representation and returns the corresponding point"""
-    if b == 0:
-        return Point.IDENTITY_ELEMENT
-    p = CURVE.p
-    yp, x_enc = b[0], b[1:]
-    yp = 0 if yp == 2 else 1
-    x = int.from_bytes(x_enc, "big")
-    y = mod_sqrt((x ** 3 + CURVE.a * x + CURVE.b) % p, p)[0]
-    if y % 2 == yp:
-        return Point(x, y, CURVE)
+def mod_hash(msg: Union[bytes, list[int]], p: int) -> ModP:
+    """
+    Takes a message and a prime and returns a hash in ModP using blake2s.
+    """
+    digest = None
+    if isinstance(msg, bytes):
+        digest = blake2s(msg).digest()
     else:
-        return Point(x, p - y, CURVE)
+        _bytes = bytes([])
+        for e in msg:
+            _bytes += e.to_bytes(8 * 4, "little")
+        digest = blake2s(_bytes).digest()
 
+    int_list = []
+    digest = list(digest)
+    # Digest is a list of 8 32 bit words
+    for pos in range(0, len(digest), 4):
+        int_list += [int.from_bytes(digest[pos: pos + 4], 'little')]
+
+    ret = 0
+    for i, elem in enumerate(int_list):
+        ret += elem * (2 ** (32 * i))
+    return ModP(ret % p, p)
 
 def inner_product(a: List[ModP], b: List[ModP]) -> ModP:
     """Inner-product of vectors in Z_p"""
     assert len(a) == len(b)
     return sum([ai * bi for ai, bi in zip(a, b)], ModP(0, a[0].p))
+
+
+def set_ec_points(ids, segments, memory, name: str, ps: list[Point]):
+    points_cairo = segments.add()
+    ids.get_or_set_value(name, points_cairo)
+    for i, p in enumerate(ps):
+        memory[points_cairo + 2 * i + 0] = p.x
+        memory[points_cairo + 2 * i + 1] = p.y
+ 
